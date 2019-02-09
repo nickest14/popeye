@@ -1,0 +1,95 @@
+version: '3.6'
+services:
+  popeye-db:
+    restart: always
+    image: postgres:9.6.3-alpine
+    volumes:
+      - popeye-data:/var/lib/postgresql/data
+    env_file:
+      - ./env/.dev
+      - ./env/.popeye_conf
+    networks:
+      - popeye-network
+    ports:
+      - "5432:5432"
+  popeye-redis:
+    restart: always
+    image: redis:4.0.1-alpine
+    volumes:
+      - popeye-redis-data:/data
+    networks:
+      - popeye-network
+    ports:
+      - "6379:6379"
+  popeye-rabbitmq:
+    restart: always
+    image: rabbitmq:3.6.11-management-alpine
+    env_file:
+      - ./env/.dev
+      - ./env/.popeye_conf
+    networks:
+      - popeye-network
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+  popeye:
+    restart: always
+    image: nickest11/popeye:master
+    build: ./src
+    depends_on:
+      - popeye-db
+      - popeye-redis
+    networks:
+      - popeye-network
+    env_file:
+      - ./env/.dev
+      - ./env/.popeye_conf
+    volumes:
+      - ./src:/usr/src/app/
+    ports:
+      -  "8000:8000"
+    command: >
+      bash -c "python manage.py makemigrations &&
+               python manage.py migrate &&
+               python manage.py runserver 0.0.0.0:8000"
+  popeye-celery:
+    restart: always
+    image: nickest11/popeye:master
+    build: ./src
+    depends_on:
+      - popeye-rabbitmq
+      - popeye-redis
+    networks:
+      - popeye-network
+    env_file:
+      - ./env/.dev
+      - ./env/.popeye_conf
+    volumes:
+      - ./src:/usr/src/app/
+    command: celery -A popeye worker -l info -Q celery -n celery@%h
+  popeye-celery-beat:
+    restart: always
+    image: nickest11/popeye:master
+    build: ./src
+    networks:
+      - popeye-network
+    env_file:
+      - ./env/.dev
+      - ./env/.popeye_conf
+    volumes:
+      - ./src:/usr/src/app/
+    command: celery -A popeye beat -l info
+  nginx:
+    restart: always
+    image: nginx:1.15
+    links:
+      - popeye
+    depends_on:
+      - popeye
+networks:
+  popeye-network:
+    driver: bridge
+
+volumes:
+  popeye-data:  # popeye db
+  popeye-redis-data:  # popeye cache
