@@ -1,0 +1,7 @@
+FIELD_ERROR = 'Field error'
+USERNAME_ERROR = 'Username error'
+USERNAME_IN_USED = 'Username in used'
+PASSWORD_ERROR = 'Password must be 6 to 15 characters'
+PASSWORD_NOT_MATCH = 'Password not matched'
+INVALID_REALNAME = 'Real name error'
+INVALID_PHONE = 'Phone error'

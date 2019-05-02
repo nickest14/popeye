@@ -16,7 +16,7 @@ __pycache__/
 #lib/
 lib64/
 parts/
-*.idea
+*.idea*
 *.vscode
 
 # Installer logs

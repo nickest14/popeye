@@ -14,7 +14,8 @@ import datetime
 import os
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR = os.path.dirname(os.path.dirname(
+    os.path.dirname(os.path.abspath(__file__))))
 
 
 # Quick-start development settings - unsuitable for production
@@ -167,10 +168,6 @@ CELERYD_TASK_SOFT_TIME_LIMIT = os.environ.get('CELERYD_TASK_SOFT_TIME_LIMIT',
                                               270)  # set to 4 min and 30 sec
 CELERYD_TASK_TIME_LIMIT = os.environ.get('CELERYD_TASK_TIME_LIMIT',
                                          300)  # set to 5 min
-
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/2.1/howto/static-files/
 
 STATIC_ROOT = 'static'
 STATIC_URL = '/static/'
