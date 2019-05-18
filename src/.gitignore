@@ -1,0 +1,76 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+# C extensions
+*.so
+
+# DB
+*.db
+
+# Editor
+*.DS_Store
+
+# Distribution / packaging
+
+#lib/
+lib64/
+parts/
+
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*,cover
+.hypothesis/
+
+# Translations
+*.mo
+*.pot
+
+# Django stuff:
+*.log
+local_settings.py
+
+
+# Scrapy stuff:
+.scrapy
+
+
+
+# IPython Notebook
+.ipynb_checkpoints
+
+# pyenv
+.python-version
+
+# celery beat schedule file
+celerybeat-schedule
+
+celerybeat.pid
+celeryd.pid
+
+# dotenv
+.env
+
+# virtualenv
+venv/
+ENV/
+
+db.sqlite3
+
+# Upload Folder
+upload/*
+
+
+static/*
+

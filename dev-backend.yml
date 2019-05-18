@@ -3,11 +3,10 @@ services:
   popeye-db:
     restart: always
     image: postgres:9.6.3-alpine
+    environment:
+      - DJANGO_SETTINGS_MODULE=popeye.settings.local
     volumes:
       - popeye-data:/var/lib/postgresql/data
-    env_file:
-      - ./env/.dev
-      - ./env/.popeye_conf
     networks:
       - popeye-network
     ports:
@@ -24,9 +23,10 @@ services:
   popeye-rabbitmq:
     restart: always
     image: rabbitmq:3.6.11-management-alpine
-    env_file:
-      - ./env/.dev
-      - ./env/.popeye_conf
+    environment:
+      - RABBITMQ_HOST=popeye-rabbitmq
+      - RABBITMQ_DEFAULT_USER=popeye
+      - RABBITMQ_DEFAULT_PASS=pass1234
     networks:
       - popeye-network
     ports:
@@ -35,15 +35,14 @@ services:
   popeye:
     restart: always
     image: nickest11/popeye:master
+    environment:
+      - DJANGO_SETTINGS_MODULE=popeye.settings.local
     build: ./src
     depends_on:
       - popeye-db
       - popeye-redis
     networks:
       - popeye-network
-    env_file:
-      - ./env/.dev
-      - ./env/.popeye_conf
     volumes:
       - ./src:/usr/src/app/
     ports:
@@ -55,30 +54,29 @@ services:
   popeye-celery:
     restart: always
     image: nickest11/popeye:master
+    environment:
+      - DJANGO_SETTINGS_MODULE=popeye.settings.local
+      - C_FORCE_ROOT=True
     build: ./src
     depends_on:
       - popeye-rabbitmq
       - popeye-redis
     networks:
       - popeye-network
-    env_file:
-      - ./env/.dev
-      - ./env/.popeye_conf
     volumes:
       - ./src:/usr/src/app/
     command: celery -A popeye worker -l info -Q celery -n celery@%h
   popeye-celery-beat:
     restart: always
     image: nickest11/popeye:master
+    environment:
+      - DJANGO_SETTINGS_MODULE=popeye.settings.local
     build: ./src
     networks:
       - popeye-network
-    env_file:
-      - ./env/.dev
-      - ./env/.popeye_conf
     volumes:
       - ./src:/usr/src/app/
-    command: celery -A popeye beat -l info
+    command: celery -A popeye beat -l info --pidfile=
   nginx:
     restart: always
     image: nginx:1.15

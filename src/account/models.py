@@ -9,10 +9,10 @@ def avatar_dir_path(instance, filename):
 
 class User(AbstractUser):
 
-    ROLE_ADMIN = 'admin'
-    ROLE_STAFF = 'staff'
-    ROLE_CUSTOMER = 'customer'
-    ROLE_STORE = 'store'
+    ROLE_ADMIN = 0
+    ROLE_STAFF = 1
+    ROLE_CUSTOMER = 2
+    ROLE_STORE = 3
     ROLE_OPTIONS = (
         (ROLE_ADMIN, 'admin'),
         (ROLE_STAFF, 'staff'),
@@ -20,13 +20,12 @@ class User(AbstractUser):
         (ROLE_STORE, 'store'),
     )
 
-    nickname = models.CharField(max_length=100, blank=True, null=True)
+    nickname = models.CharField(max_length=15, blank=True, null=True)
     phone = models.CharField(max_length=10, blank=True, null=True)
     line = models.CharField(max_length=30, blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+    created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    register_ip = models.CharField(max_length=255, blank=True, null=True)
+    register_ip = models.CharField(max_length=30, blank=True, null=True)
     avatar = models.ImageField(null=True, blank=True,
                                upload_to=avatar_dir_path)
-    role = models.CharField(max_length=30, default=ROLE_STAFF,
-                            choices=ROLE_OPTIONS)
+    role = models.IntegerField(default=ROLE_CUSTOMER, choices=ROLE_OPTIONS)
