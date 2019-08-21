@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: popeye-celery-beat
+  labels:
+    app: popeye
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: popeye-celery-beat
+  template:
+    metadata:
+      annotations:
+        version: latest
+      labels:
+        app: popeye-celery-beat
+    spec:
+      containers:
+      - name: popeye-celery-beat
+        image: nickest11/popeye:master
+        imagePullPolicy: Always
+        command: ["celery"]
+        args: ["-A", "popeye", "beat", "-l", "debug"]
+        resources:
+          limits:
+            cpu: 300m
+            memory: 600Mi
+          requests:
+            cpu: 10m
+            memory: 50Mi
+        envFrom:
+        - configMapRef:
+            name: popeye-django
+        - configMapRef:
+            name: popeye-rabbitmq
+        - configMapRef:
+            name: popeye-postgres
+        - secretRef:
+            name: popeye-django
+        - secretRef:
+            name: popeye-postgres
+        - secretRef:
+            name: popeye-rabbitmq
+        - secretRef:
+            name: popeye-celery
+      - name: cloudsql-proxy
+        image: gcr.io/cloudsql-docker/gce-proxy:1.11
+        command: ["/cloud_sql_proxy",
+                  "-instances=$(CLOUDSQL_INSTANCE)=tcp:5432",
+                  "-credential_file=/secrets/cloudsql/credentials.json"]
+        envFrom:
+        - configMapRef:
+            name: popeye-cloudsql-instance
+        volumeMounts:
+        - name: cloudsql-instance-credentials
+          mountPath: /secrets/cloudsql
+          readOnly: true
+      volumes:
+      - name: cloudsql-instance-credentials
+        secret:
+          secretName: cloudsql-db-credentials

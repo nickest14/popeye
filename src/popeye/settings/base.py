@@ -196,6 +196,16 @@ USE_L10N = True
 
 USE_TZ = True
 
+# django-storage
+GS_BUCKET_NAME = os.getenv('GS_BUCKET_NAME')
+if GS_BUCKET_NAME:
+    from google.oauth2 import service_account
+
+    GS_CREDENTIALS = service_account.Credentials.from_service_account_file(
+        "/gs/credentials.json"
+    )
+    DEFAULT_FILE_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
+    STATICFILES_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
 
 CELERY_ACCEPT_CONTENT = ['pickle', 'json']
 CELERY_RESULT_BACKEND = 'rpc://'

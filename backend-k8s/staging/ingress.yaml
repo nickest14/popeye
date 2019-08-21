@@ -1,0 +1,28 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: popeye-ingress
+  namespace: staging
+  labels:
+    app: popeye-ingress
+  annotations:
+    kubernetes.io/ingress.global-static-ip-name: static-ip
+spec:
+  tls:
+    - secretName: codingcmksecret817
+  rules:
+    - host: nick.codingcmk.com
+      http:
+        paths:
+          - path: /*
+            backend:
+              serviceName: popeye-public
+              servicePort: 80    
+    - host: api.codingcmk.com
+      http:
+        paths:
+          - path: /*
+            backend:
+              serviceName: popeye-public
+              servicePort: 80                               
+

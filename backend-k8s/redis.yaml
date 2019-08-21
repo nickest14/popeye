@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: staging
+  name: popeye-redis
+  labels:
+    app: popeye-redis
+spec:
+  type: ClusterIP
+  ports:
+  - protocol: TCP
+    port: 6379
+    targetPort: 6379
+  selector:
+    app: popeye-redis
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: staging
+  name: popeye-redis
+  labels:
+    app: popeye-redis
+spec:
+  selector:
+    matchLabels:
+      app: popeye-redis
+  replicas: 1
+  template:
+    metadata:
+      annotations:
+        version: latest
+      labels:
+        app: popeye-redis
+    spec:
+      containers:
+      - name: popeye-redis
+        image: redis:4.0.1-alpine
+        ports:
+        - containerPort: 6379

@@ -5,6 +5,8 @@ services:
     image: postgres:9.6.3-alpine
     environment:
       - DJANGO_SETTINGS_MODULE=popeye.settings.local
+    env_file:
+      - ./src/env/.popeye_conf  
     volumes:
       - popeye-data:/var/lib/postgresql/data
     networks:
@@ -36,7 +38,7 @@ services:
     restart: always
     image: nickest11/popeye:master
     environment:
-      - DJANGO_SETTINGS_MODULE=popeye.settings.local
+      - DJANGO_SETTINGS_MODULE=popeye.settings.staging
     build: ./src
     depends_on:
       - popeye-db

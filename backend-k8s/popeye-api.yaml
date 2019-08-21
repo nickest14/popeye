@@ -1,0 +1,158 @@
+kind: Service
+apiVersion: v1
+metadata:
+  namespace: staging
+  name: popeye-public
+  labels:
+    app: popeye-api
+  annotations:
+    beta.cloud.google.com/backend-config: '{"ports": {"80":"popeye-backend-config"}}'
+spec:
+  type: NodePort
+  ports:
+  - name: popeye-api
+    protocol: TCP
+    port: 80
+    targetPort: 5000
+  selector:
+    app: popeye-api
+---
+kind: Service
+apiVersion: v1
+metadata:
+  namespace: staging
+  name: popeye
+  labels:
+    app: popeye-api
+spec:
+  type: ClusterIP
+  ports:
+  - name: popeye-api
+    protocol: TCP
+    port: 8000
+    targetPort: 5000
+  selector:
+    app: popeye-api
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: staging
+  name: popeye-api
+  labels:
+    app: popeye
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: popeye-api
+  template:
+    metadata:
+      annotations:
+        version: latest
+      labels:
+        app: popeye-api
+    spec:
+      # imagePullSecrets:
+      # - name: unnotech
+      # initContainers:
+      # - name: collect-statics
+      #   image: nickest11/popeye:master
+      #   command: ['python', 'manage.py']
+      #   args: ['collectstatic']
+      #   envFrom:
+      #   - configMapRef:
+      #       name: popeye-django
+      #   - configMapRef:
+      #       name: popeye-rabbitmq
+      #   - configMapRef:
+      #       name: popeye-postgres
+      #   - secretRef:
+      #       name: popeye-django
+      #   - secretRef:
+      #       name: popeye-postgres
+      #   - secretRef:
+      #       name: popeye-rabbitmq
+      #   - secretRef:
+      #       name: popeye-celery
+      #   volumeMounts:
+      #   - mountPath: /gs
+      #     name: gs-credentials
+      #     readOnly: true
+        # volumeMounts:
+        #   - name: shared-assets
+        #     mountPath: /usr/src/app/static
+      containers:
+      - name: popeye-nginx
+        image: nginx:stable
+        ports:
+        - name: popeye-api
+          containerPort: 5000
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 5000
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        volumeMounts:
+          - name: nginx-conf
+            mountPath: /etc/nginx/conf.d
+          # - name: shared-assets
+          #   mountPath: /usr/src/app/static
+      - name: popeye-api
+        image: nickest11/popeye:master
+        imagePullPolicy: Always
+        # command: ['gunicorn', 'popeye.wsgi:application']
+        command: ['daphne', '-b', '0.0.0.0', '-p', '8000', 'popeye.asgi:application']        
+        ports:
+        - name: popeye-api
+          containerPort: 8000
+        # readinessProbe:
+        #   httpGet:
+        #     path: /popeyeadmin/login/?next=/popeyeadmin/
+        #     port: 8000
+        #   initialDelaySeconds: 5
+        #   periodSeconds: 10
+        envFrom:
+        - configMapRef:
+            name: popeye-django
+        - configMapRef:
+            name: popeye-rabbitmq
+        - configMapRef:
+            name: popeye-postgres
+        - secretRef:
+            name: popeye-django
+        - secretRef:
+            name: popeye-postgres
+        - secretRef:
+            name: popeye-rabbitmq
+        - secretRef:
+            name: popeye-celery
+        volumeMounts:
+        - mountPath: /gs
+          name: gs-credentials
+          readOnly: true            
+      - name: cloudsql-proxy
+        image: gcr.io/cloudsql-docker/gce-proxy:1.11
+        command: ["/cloud_sql_proxy",
+                  "-instances=$(CLOUDSQL_INSTANCE)=tcp:5432",
+                  "-credential_file=/secrets/cloudsql/credentials.json"]
+        envFrom:
+        - configMapRef:
+            name: popeye-cloudsql-instance
+        volumeMounts:
+        - name: cloudsql-instance-credentials
+          mountPath: /secrets/cloudsql
+          readOnly: true
+      volumes:
+      - name: cloudsql-instance-credentials
+        secret:
+          secretName: cloudsql-db-credentials
+      - name: gs-credentials
+        secret:
+          secretName: gs-credentials          
+      - name: nginx-conf
+        configMap:
+          name: popeye-nginx-conf
+      # - name: shared-assets
+      #   emptyDir: {}

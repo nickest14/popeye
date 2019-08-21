@@ -1,0 +1,49 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  # Unique key of the Job instance
+  name: popeye-job
+  namespace: staging
+spec:
+  template:
+    metadata:
+      name: popeye-job
+    spec:
+      containers:
+      - name: migrate-db
+        image: nickest11/popeye:master
+        command: ['python', 'manage.py']
+        args: ['migrate']
+        envFrom:
+        - configMapRef:
+            name: popeye-django
+        - configMapRef:
+            name: popeye-rabbitmq
+        - configMapRef:
+            name: popeye-postgres
+        - secretRef:
+            name: popeye-django
+        - secretRef:
+            name: popeye-postgres
+        - secretRef:
+            name: popeye-rabbitmq
+        - secretRef:
+            name: popeye-celery
+      - name: cloudsql-proxy
+        image: gcr.io/cloudsql-docker/gce-proxy:1.11
+        command: ["/cloud_sql_proxy",
+                  "-instances=nickest1234:asia-east1:staging-popeye-db=tcp:5432",
+                  "-credential_file=/secrets/cloudsql/credentials.json"]
+        envFrom:
+        - configMapRef:
+            name: popeye-cloudsql-instance
+        volumeMounts:
+        - name: cloudsql-instance-credentials
+          mountPath: /secrets/cloudsql
+          readOnly: true
+      volumes:
+      - name: cloudsql-instance-credentials
+        secret:
+          secretName: cloudsql-db-credentials
+      # Do not restart containers after they exit
+      restartPolicy: Never

@@ -22,7 +22,6 @@ class AuthMiddleware:
 
         # Close old connections to prevent usage of timed out connections
         close_old_connections()
-
         query_string = scope['query_string'].decode('utf-8')
 
         if not query_string:
@@ -38,7 +37,6 @@ class AuthMiddleware:
         token = query_dict.get('token')[0]
         try:
             data = jwt_decode_handler(token)
-            print(data)
         except jwt.ExpiredSignatureError:
             logger.error(f"Expired token: {token}")
             return self.inner(dict(scope))
@@ -48,7 +46,6 @@ class AuthMiddleware:
         except jwt.DecodeError:
             logger.error(f"JWT decode error: {token}")
             return self.inner(dict(scope))
-
         scope['user_id'] = data['user_id']
         scope['username'] = data['username']
         scope['role'] = data['role']

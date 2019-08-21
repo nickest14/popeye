@@ -70,7 +70,6 @@ class MemberSerializer(serializers.ModelSerializer):
         return ret
 
     def validate(self, data):
-        print(data)
         password = data.get('password')
         password_pattern = re.compile('^[a-zA-Z0-9]{6,15}$')
         if password and not password_pattern.match(password):
