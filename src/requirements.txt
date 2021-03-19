@@ -8,7 +8,7 @@ Django==2.2.4
 django-cors-headers==2.5.3
 django-redis==4.10.0
 django-storages==1.7.1
-djangorestframework==3.9.0
+djangorestframework==3.11.2
 djangorestframework-jwt==1.11.0
 google-api-core==1.5.2
 google-auth==1.6.1
