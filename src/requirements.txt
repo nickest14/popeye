@@ -1,6 +1,6 @@
 amqp==2.3.2
 billiard==3.5.0.5
-celery==4.2.1
+celery==5.2.2
 channels==2.2.0
 channels-redis==2.4.0
 daphne==2.2.5
