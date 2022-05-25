@@ -18,7 +18,7 @@ googleapis-common-protos==1.5.5
 kombu==4.2.1
 Pillow==5.4.0
 psycopg2==2.7.3
-PyJWT==1.7.1
+PyJWT==2.4.0
 pytz==2018.9
 redis==3.2.0
 rest-condition==1.0.3
